@@ -3,7 +3,9 @@ GfreeauGetJWTBundle
 
 This bundle requires LexikJWTAuthenticationBundle. Please read the docs for that bundle at https://github.com/lexik/LexikJWTAuthenticationBundle
 
-It provides a replacement for the form factory "form_login". "form_login" is designed for use with cookies and will set cookies even when the stateless parameter is true.
+It provides a replacement for the security factory "form_login". "form_login" is designed for use with cookies and will set cookies even when the stateless parameter is true.
+
+Authenticating json web tokens is provided by LexikJWTAuthenticationBundle.
 
 Json Web Tokens are perfect for use in SPA such as AngularJS. Using this bundle you can easily use symfony2 for your API.
 
@@ -58,7 +60,7 @@ Usage
 
 This bundle supports the AuthenticationSuccessEvent from LexikJWTAuthenticationBundle, read their documentation for more information. You can use this event to append more information to your json web token.
 
-A route must be defined for the url you wish to get your token:
+A route must be defined for the url you wish to use to get your token:
 
 ```php
 /**
