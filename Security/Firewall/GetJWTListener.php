@@ -57,20 +57,11 @@ class GetJWTListener implements ListenerInterface
             $password = $request->get($this->options['password_parameter'], null, true);
         }
 
-        $response = null;
-
         try {
             $token = $this->authenticationManager->authenticate(new UsernamePasswordToken($username, $password, $this->providerKey));
-
-            if ($token instanceof TokenInterface) {
-                $response = $this->onAuthenticationSuccess($token);
-            }
+            $response = $this->onAuthenticationSuccess($token);
         } catch (AuthenticationException $e) {
             $response = $this->onAuthenticationFailure();
-        }
-
-        if (null == $response) {
-            $response = new JsonResponse('', 400);
         }
 
         $event->setResponse($response);
