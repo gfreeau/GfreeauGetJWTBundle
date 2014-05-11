@@ -40,6 +40,9 @@ Usage
             pattern:  ^/api/getToken$
             stateless: true
             gfreeau_get_jwt:
+                username_parameter: username
+                password_parameter: password
+                ttl: 86400
                 post_only: true
 
         # protected firewall, where a user will be authenticated by its jwt token
@@ -50,6 +53,8 @@ Usage
             lexik_jwt: ~ # check token in Authorization Header, with a value prefix of e:    bearer
 
 ```
+
+This bundle supports the AuthenticationSuccessEvent from LexikJWTAuthenticationBundle, read their documentation for more information. You can use this event to append more information to your json web token.
 
 A route must be defined for the url you wish to get your token:
 
