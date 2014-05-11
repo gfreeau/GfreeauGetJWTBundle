@@ -5,11 +5,29 @@ This bundle requires LexikJWTAuthenticationBundle. Please read the docs for that
 
 It provides a replacement for the form factory "form_login". "form_login" is designed for use with cookies and will set cookies even when the stateless parameter is true.
 
-
 Installation
 ------------
 
-Details for composer coming soon
+Installation with composer:
+
+``` json
+"require": {
+    "gfreeau/get-jwt-bundle": "dev-master"
+}
+```
+
+Next, be sure to enable the bundle in your `app/AppKernel.php` file:
+
+``` php
+public function registerBundles()
+{
+    return array(
+        // ...
+        new Gfreeau\Bundle\GetJWTBundle\GfreeauGetJWTBundle(),
+        // ...
+    );
+}
+```
 
 Usage
 -----
