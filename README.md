@@ -9,6 +9,8 @@ Authenticating json web tokens is provided by LexikJWTAuthenticationBundle.
 
 Json Web Tokens are perfect for use in SPA such as AngularJS. Using this bundle you can easily use symfony2 for your API.
 
+You should use SSL connections only for your API to protect the contents of your json web tokens.
+
 Installation
 ------------
 
