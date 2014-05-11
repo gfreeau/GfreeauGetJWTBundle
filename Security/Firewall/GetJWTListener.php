@@ -8,13 +8,15 @@ use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterfac
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoder;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Events;
 use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
-use Symfony\Component\Validator\Exception\RuntimeException;
+use RuntimeException;
+use InvalidArgumentException;
 
 class GetJWTListener implements ListenerInterface
 {
@@ -25,8 +27,21 @@ class GetJWTListener implements ListenerInterface
     protected $dispatcher;
     protected $encoder;
 
+    /**
+     * @param SecurityContextInterface $securityContext
+     * @param AuthenticationManagerInterface $authenticationManager
+     * @param $providerKey
+     * @param array $options
+     * @param EventDispatcherInterface $dispatcher
+     * @param JWTEncoder $encoder
+     * @throws InvalidArgumentException
+     */
     public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, $providerKey, array $options = array(), EventDispatcherInterface $dispatcher = null, JWTEncoder $encoder = null)
     {
+        if (empty($providerKey)) {
+            throw new InvalidArgumentException('$providerKey must not be empty.');
+        }
+
         $this->securityContext = $securityContext;
         $this->authenticationManager = $authenticationManager;
         $this->providerKey = $providerKey;
@@ -40,6 +55,9 @@ class GetJWTListener implements ListenerInterface
         $this->encoder = $encoder;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function handle(GetResponseEvent $event)
     {
         $request = $event->getRequest();
@@ -67,6 +85,11 @@ class GetJWTListener implements ListenerInterface
         $event->setResponse($response);
     }
 
+    /**
+     * @param TokenInterface $token
+     * @return Response
+     * @throws RuntimeException
+     */
     protected function onAuthenticationSuccess(TokenInterface $token)
     {
         if (!$this->encoder) {
@@ -92,6 +115,9 @@ class GetJWTListener implements ListenerInterface
         return new JsonResponse($response);
     }
 
+    /**
+     * @return JsonResponse
+     */
     protected function onAuthenticationFailure()
     {
         return new JsonResponse('invalid credentials', 401);
