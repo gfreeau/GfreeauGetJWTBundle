@@ -5,6 +5,8 @@ This bundle requires LexikJWTAuthenticationBundle. Please read the docs for that
 
 It provides a replacement for the security factory "form_login". "form_login" is designed for use with cookies and will set cookies even when the stateless parameter is true.
 
+The 'switch_user' and 'logout' config options are not supported with this security factory as they rely on cookies. A version of switch_user is being worked on.
+
 Authenticating json web tokens is provided by LexikJWTAuthenticationBundle.
 
 Json Web Tokens are perfect for use in SPA such as AngularJS. Using this bundle you can easily use symfony2 for your API.
