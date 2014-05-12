@@ -5,38 +5,38 @@ namespace Gfreeau\Bundle\GetJWTBundle\Security\Firewall;
 use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoder;
+use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Events;
-use Lexik\Bundle\JWTAuthenticationBundle\Event\AuthenticationSuccessEvent;
 use RuntimeException;
 use InvalidArgumentException;
 
 class GetJWTListener implements ListenerInterface
 {
-    protected $securityContext;
-    protected $authenticationManager;
     protected $providerKey;
     protected $options;
-    protected $dispatcher;
-    protected $encoder;
+
+    private $securityContext;
+    private $authenticationManager;
+    private $successHandler;
+    private $failureHandler;
 
     /**
      * @param SecurityContextInterface $securityContext
      * @param AuthenticationManagerInterface $authenticationManager
      * @param $providerKey
+     * @param AuthenticationSuccessHandlerInterface $successHandler
+     * @param AuthenticationFailureHandlerInterface $failureHandler
      * @param array $options
-     * @param EventDispatcherInterface $dispatcher
-     * @param JWTEncoder $encoder
      * @throws InvalidArgumentException
      */
-    public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, $providerKey, array $options = array(), EventDispatcherInterface $dispatcher = null, JWTEncoder $encoder = null)
+    public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, $providerKey, AuthenticationSuccessHandlerInterface $successHandler, AuthenticationFailureHandlerInterface $failureHandler, array $options = array())
     {
         if (empty($providerKey)) {
             throw new InvalidArgumentException('$providerKey must not be empty.');
@@ -45,14 +45,13 @@ class GetJWTListener implements ListenerInterface
         $this->securityContext = $securityContext;
         $this->authenticationManager = $authenticationManager;
         $this->providerKey = $providerKey;
+        $this->successHandler = $successHandler;
+        $this->failureHandler = $failureHandler;
         $this->options = array_merge(array(
             'username_parameter' => 'username',
             'password_parameter' => 'password',
-            'ttl' => 86400,
             'post_only' => true,
         ), $options);
-        $this->dispatcher = $dispatcher;
-        $this->encoder = $encoder;
     }
 
     /**
@@ -77,49 +76,34 @@ class GetJWTListener implements ListenerInterface
 
         try {
             $token = $this->authenticationManager->authenticate(new UsernamePasswordToken($username, $password, $this->providerKey));
-            $response = $this->onAuthenticationSuccess($token);
+            $response = $this->onSuccess($event, $request, $token);
+
         } catch (AuthenticationException $e) {
-            $response = $this->onAuthenticationFailure();
+            $response = $this->onFailure($event, $request, $e);
         }
 
         $event->setResponse($response);
     }
 
-    /**
-     * @param TokenInterface $token
-     * @return Response
-     * @throws RuntimeException
-     */
-    protected function onAuthenticationSuccess(TokenInterface $token)
+    protected function onSuccess(GetResponseEvent $event, Request $request, TokenInterface $token)
     {
-        if (!$this->encoder) {
-            throw new RuntimeException('encoder must be an instance of JWTEncoder to create tokens');
+        $response = $this->successHandler->onAuthenticationSuccess($request, $token);
+
+        if (!$response instanceof Response) {
+            throw new \RuntimeException('Authentication Success Handler did not return a Response.');
         }
 
-        $user = $token->getUser();
-
-        $payload             = array();
-        $payload['exp']      = time() + $this->options['ttl'];
-        $payload['username'] = $user->getUsername();
-
-        $jwt = $this->encoder->encode($payload)->getTokenString();
-
-        $response = $jwt;
-
-        if ($this->dispatcher) {
-            $event = new AuthenticationSuccessEvent(array('token' => $jwt), $user);
-            $this->dispatcher->dispatch(Events::AUTHENTICATION_SUCCESS, $event);
-            $response = $event->getData();
-        }
-
-        return new JsonResponse($response);
+        return $response;
     }
 
-    /**
-     * @return JsonResponse
-     */
-    protected function onAuthenticationFailure()
+    protected function onFailure(GetResponseEvent $event, Request $request, AuthenticationException $failed)
     {
-        return new JsonResponse('invalid credentials', 401);
+        $response = $this->failureHandler->onAuthenticationFailure($request, $failed);
+
+        if (!$response instanceof Response) {
+            throw new \RuntimeException('Authentication Failure Handler did not return a Response.');
+        }
+
+        return $response;
     }
 }

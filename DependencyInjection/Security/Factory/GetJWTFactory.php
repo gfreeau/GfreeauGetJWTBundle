@@ -26,8 +26,16 @@ class GetJWTFactory implements SecurityFactoryInterface
         $listener = $container
             ->setDefinition($listenerId, new DefinitionDecorator('gfreeau_get_jwt.security.authentication.listener'))
             ->replaceArgument(2, $id)
-            ->replaceArgument(3, $config)
+            ->replaceArgument(5, $config)
         ;
+
+        if (isset($config['success_handler'])) {
+            $listener->replaceArgument(3, new Reference($config['success_handler']));
+        }
+
+        if (isset($config['failure_handler'])) {
+            $listener->replaceArgument(4, new Reference($config['failure_handler']));
+        }
 
         return array($providerId, $listenerId, $defaultEntryPoint);
     }
@@ -61,12 +69,11 @@ class GetJWTFactory implements SecurityFactoryInterface
                 ->scalarNode('password_parameter')
                     ->defaultValue('password')
                 ->end()
-                ->integerNode('ttl')
-                    ->defaultValue(86400)
-                ->end()
                 ->booleanNode('post_only')
                     ->defaultTrue()
                 ->end()
+                ->scalarNode('success_handler')->end()
+                ->scalarNode('failure_handler')->end()
             ->end();
     }
 

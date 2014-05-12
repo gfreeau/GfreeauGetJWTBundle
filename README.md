@@ -48,10 +48,12 @@ Usage
             pattern:  ^/api/getToken$
             stateless: true
             gfreeau_get_jwt:
+                # this is the default config
                 username_parameter: username
                 password_parameter: password
-                ttl: 86400
                 post_only: true
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
         # protected firewall, where a user will be authenticated by its jwt token
         api:

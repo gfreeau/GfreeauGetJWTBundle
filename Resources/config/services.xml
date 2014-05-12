@@ -9,9 +9,9 @@
             <argument type="service" id="security.context"/>
             <argument type="service" id="security.authentication.manager" />
             <argument /> <!-- Provider-shared Key -->
+            <argument type="service" id="lexik_jwt_authentication.handler.authentication_success" />
+            <argument type="service" id="lexik_jwt_authentication.handler.authentication_failure" />
             <argument /> <!-- Options -->
-            <argument type="service" id="event_dispatcher" on-invalid="null" />
-            <argument type="service" id="lexik_jwt_authentication.jwt_encoder" on-invalid="null" />
         </service>
     </services>
 </container>
