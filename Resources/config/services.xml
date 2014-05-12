@@ -6,12 +6,14 @@
     <services>
         <service id="gfreeau_get_jwt.security.authentication.listener"
                  class="Gfreeau\Bundle\GetJWTBundle\Security\Firewall\GetJWTListener" public="false" abstract="true">
+            <tag name="monolog.logger" channel="security" />
             <argument type="service" id="security.context"/>
             <argument type="service" id="security.authentication.manager" />
             <argument /> <!-- Provider-shared Key -->
             <argument type="service" id="lexik_jwt_authentication.handler.authentication_success" />
             <argument type="service" id="lexik_jwt_authentication.handler.authentication_failure" />
             <argument /> <!-- Options -->
+            <argument type="service" id="logger" on-invalid="null" />
         </service>
     </services>
 </container>

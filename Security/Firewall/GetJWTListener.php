@@ -14,6 +14,7 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use InvalidArgumentException;
 
@@ -21,6 +22,7 @@ class GetJWTListener implements ListenerInterface
 {
     protected $providerKey;
     protected $options;
+    protected $logger;
 
     private $securityContext;
     private $authenticationManager;
@@ -36,7 +38,7 @@ class GetJWTListener implements ListenerInterface
      * @param array $options
      * @throws InvalidArgumentException
      */
-    public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, $providerKey, AuthenticationSuccessHandlerInterface $successHandler, AuthenticationFailureHandlerInterface $failureHandler, array $options = array())
+    public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, $providerKey, AuthenticationSuccessHandlerInterface $successHandler, AuthenticationFailureHandlerInterface $failureHandler, array $options = array(), LoggerInterface $logger = null)
     {
         if (empty($providerKey)) {
             throw new InvalidArgumentException('$providerKey must not be empty.');
@@ -52,6 +54,7 @@ class GetJWTListener implements ListenerInterface
             'password_parameter' => 'password',
             'post_only' => true,
         ), $options);
+        $this->logger = $logger;
     }
 
     /**
@@ -87,6 +90,10 @@ class GetJWTListener implements ListenerInterface
 
     protected function onSuccess(GetResponseEvent $event, Request $request, TokenInterface $token)
     {
+        if (null !== $this->logger) {
+            $this->logger->info(sprintf('User "%s" has retrieved a JWT', $token->getUsername()));
+        }
+
         $response = $this->successHandler->onAuthenticationSuccess($request, $token);
 
         if (!$response instanceof Response) {
@@ -98,6 +105,10 @@ class GetJWTListener implements ListenerInterface
 
     protected function onFailure(GetResponseEvent $event, Request $request, AuthenticationException $failed)
     {
+        if (null !== $this->logger) {
+            $this->logger->info(sprintf('JWT request failed: %s', $failed->getMessage()));
+        }
+
         $response = $this->failureHandler->onAuthenticationFailure($request, $failed);
 
         if (!$response instanceof Response) {
