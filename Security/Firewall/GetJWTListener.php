@@ -36,9 +36,10 @@ class GetJWTListener implements ListenerInterface
      * @param AuthenticationSuccessHandlerInterface $successHandler
      * @param AuthenticationFailureHandlerInterface $failureHandler
      * @param array $options
+     * @param LoggerInterface $logger
      * @throws InvalidArgumentException
      */
-    public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, $providerKey, AuthenticationSuccessHandlerInterface $successHandler, AuthenticationFailureHandlerInterface $failureHandler, array $options = array(), LoggerInterface $logger = null)
+    public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, $providerKey, AuthenticationSuccessHandlerInterface $successHandler, AuthenticationFailureHandlerInterface $failureHandler = null, array $options = array(), LoggerInterface $logger = null)
     {
         if (empty($providerKey)) {
             throw new InvalidArgumentException('$providerKey must not be empty.');
@@ -82,6 +83,10 @@ class GetJWTListener implements ListenerInterface
             $response = $this->onSuccess($event, $request, $token);
 
         } catch (AuthenticationException $e) {
+            if (null == $this->failureHandler) {
+                throw $e;
+            }
+
             $response = $this->onFailure($event, $request, $e);
         }
 

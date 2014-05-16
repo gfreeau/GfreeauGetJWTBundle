@@ -33,7 +33,10 @@ class GetJWTFactory implements SecurityFactoryInterface
             $listener->replaceArgument(3, new Reference($config['success_handler']));
         }
 
-        if (isset($config['failure_handler'])) {
+        if ($config['throw_exceptions']) {
+            // remove failure handler
+            $listener->replaceArgument(4, null);
+        } else if (isset($config['failure_handler'])) {
             $listener->replaceArgument(4, new Reference($config['failure_handler']));
         }
 
@@ -72,8 +75,15 @@ class GetJWTFactory implements SecurityFactoryInterface
                 ->booleanNode('post_only')
                     ->defaultTrue()
                 ->end()
-                ->scalarNode('success_handler')->end()
-                ->scalarNode('failure_handler')->end()
+                ->scalarNode('success_handler')
+                    ->defaultValue('lexik_jwt_authentication.handler.authentication_success')
+                ->end()
+                ->scalarNode('failure_handler')
+                    ->defaultValue('lexik_jwt_authentication.handler.authentication_failure')
+                ->end()
+                ->booleanNode('throw_exceptions')
+                    ->defaultFalse()
+                ->end()
             ->end();
     }
 
