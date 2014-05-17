@@ -4,6 +4,12 @@
     "description": "This Symfony2 bundle provides a security listener to return a JWT",
     "keywords": ["Symfony2", "bundle", "jwt", "jws", "authentication"],
     "homepage": "https://github.com/gfreeau/GfreeauGetJWTBundle",
+    "authors": [
+        {
+            "name": "Greg Freeman",
+            "homepage": "http://www.gregfreeman.org"
+        }
+    ],
     "license": "MIT",
     "require": {
         "php": ">=5.3.3",
