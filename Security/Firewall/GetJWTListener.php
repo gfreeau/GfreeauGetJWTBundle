@@ -80,6 +80,7 @@ class GetJWTListener implements ListenerInterface
 
         try {
             $token = $this->authenticationManager->authenticate(new UsernamePasswordToken($username, $password, $this->providerKey));
+            $this->securityContext->setToken($token);
             $response = $this->onSuccess($event, $request, $token);
 
         } catch (AuthenticationException $e) {
