@@ -20,7 +20,7 @@ Installation with composer:
 
 ``` json
 "require": {
-    "gfreeau/get-jwt-bundle": "dev-master"
+    "gfreeau/get-jwt-bundle": "~1.0"
 }
 ```
 
