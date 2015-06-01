@@ -15,9 +15,9 @@ class GetJWTFactory implements SecurityFactoryInterface
      */
     public function create(ContainerBuilder $container, $id, $config, $userProvider, $defaultEntryPoint)
     {
-        $providerId = 'security.authentication.provider.dao.'.$id;
+        $providerId = 'security.authentication.provider.get.jwt.'.$id;
         $container
-            ->setDefinition($providerId, new DefinitionDecorator('security.authentication.provider.dao'))
+            ->setDefinition($providerId, new DefinitionDecorator($config['authentication_provider']))
             ->replaceArgument(0, new Reference($userProvider))
             ->replaceArgument(2, $id)
         ;
@@ -83,6 +83,9 @@ class GetJWTFactory implements SecurityFactoryInterface
                 ->end()
                 ->booleanNode('throw_exceptions')
                     ->defaultFalse()
+                ->end()
+                ->scalarNode('authentication_provider')
+                    ->defaultValue('security.authentication.provider.dao')
                 ->end()
             ->end();
     }
