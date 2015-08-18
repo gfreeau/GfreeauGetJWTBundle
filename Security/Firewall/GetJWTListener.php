@@ -53,7 +53,6 @@ class GetJWTListener implements ListenerInterface
         $this->options = array_merge(array(
             'username_parameter' => 'username',
             'password_parameter' => 'password',
-            'post_only' => true,
         ), $options);
         $this->logger = $logger;
     }
@@ -65,17 +64,12 @@ class GetJWTListener implements ListenerInterface
     {
         $request = $event->getRequest();
 
-        if ($this->options['post_only'] && !$request->isMethod('POST')) {
-            $event->setResponse(new JsonResponse('invalid method', 405));
-            return;
-        }
-
-        if ($this->options['post_only']) {
+        if (!$request->isMethod('GET')) {
             $username = trim($request->request->get($this->options['username_parameter'], null, true));
             $password = $request->request->get($this->options['password_parameter'], null, true);
         } else {
-            $username = trim($request->get($this->options['username_parameter'], null, true));
-            $password = $request->get($this->options['password_parameter'], null, true);
+            $username = trim($request->query->get($this->options['username_parameter'], null, true));
+            $password = $request->query->get($this->options['password_parameter'], null, true);
         }
 
         try {
