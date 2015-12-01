@@ -16,11 +16,17 @@ class GetJWTFactory implements SecurityFactoryInterface
     public function create(ContainerBuilder $container, $id, $config, $userProvider, $defaultEntryPoint)
     {
         $providerId = 'security.authentication.provider.get.jwt.'.$id;
-        $container
+        $definition = $container
             ->setDefinition($providerId, new DefinitionDecorator($config['authentication_provider']))
             ->replaceArgument(0, new Reference($userProvider))
             ->replaceArgument(2, $id)
         ;
+
+        if ($container->hasDefinition('security.user_checker')) {
+            $definition
+                ->replaceArgument(1, new Reference('security.user_checker.'.$id))
+            ;
+        }
 
         $listenerId = 'security.authentication.listener.get.jwt.'.$id;
         $listener = $container
