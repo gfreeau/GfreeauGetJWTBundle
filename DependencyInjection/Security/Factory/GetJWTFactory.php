@@ -19,6 +19,7 @@ class GetJWTFactory implements SecurityFactoryInterface
         $container
             ->setDefinition($providerId, new DefinitionDecorator($config['authentication_provider']))
             ->replaceArgument(0, new Reference($userProvider))
+            ->replaceArgument(1, new Reference($config['user_checker']))
             ->replaceArgument(2, $id)
         ;
 
@@ -86,6 +87,11 @@ class GetJWTFactory implements SecurityFactoryInterface
                 ->end()
                 ->scalarNode('authentication_provider')
                     ->defaultValue('security.authentication.provider.dao')
+                ->end()
+                ->scalarNode('user_checker')
+                    ->defaultValue('security.user_checker')
+                    ->treatNullLike('security.user_checker')
+                    ->info('The UserChecker to use when authenticating users in this firewall.')
                 ->end()
             ->end();
     }

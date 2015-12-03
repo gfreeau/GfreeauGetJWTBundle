@@ -53,6 +53,7 @@ Usage
                 password_parameter: password
                 post_only: true
                 authentication_provider: security.authentication.provider.dao
+                user_checker: security.user_checker 
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
