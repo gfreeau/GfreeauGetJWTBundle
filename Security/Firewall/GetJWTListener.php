@@ -2,8 +2,8 @@
 
 namespace Gfreeau\Bundle\GetJWTBundle\Security\Firewall;
 
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Firewall\ListenerInterface;
-use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
@@ -30,7 +30,7 @@ class GetJWTListener implements ListenerInterface
     private $failureHandler;
 
     /**
-     * @param SecurityContextInterface $securityContext
+     * @param TokenStorageInterface $securityContext
      * @param AuthenticationManagerInterface $authenticationManager
      * @param $providerKey
      * @param AuthenticationSuccessHandlerInterface $successHandler
@@ -39,7 +39,7 @@ class GetJWTListener implements ListenerInterface
      * @param LoggerInterface $logger
      * @throws InvalidArgumentException
      */
-    public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, $providerKey, AuthenticationSuccessHandlerInterface $successHandler, AuthenticationFailureHandlerInterface $failureHandler = null, array $options = array(), LoggerInterface $logger = null)
+    public function __construct(TokenStorageInterface $securityContext, AuthenticationManagerInterface $authenticationManager, $providerKey, AuthenticationSuccessHandlerInterface $successHandler, AuthenticationFailureHandlerInterface $failureHandler = null, array $options = array(), LoggerInterface $logger = null)
     {
         if (empty($providerKey)) {
             throw new InvalidArgumentException('$providerKey must not be empty.');
