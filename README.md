@@ -18,18 +18,14 @@ Installation
 
 Installation with composer:
 
-``` json
-"require": {
-    "gfreeau/get-jwt-bundle": "~1.0"
-}
+``` bash
+composer require gfreeau/get-jwt-bundle
 ```
 
-If you are using symfony 3 you can test the new 2.0 version
+If you are using symfony 3 you can test the new 2.0 version:
 
-``` json
-"require": {
-    "gfreeau/get-jwt-bundle": "2.0.x-dev"
-}
+``` bash
+composer require gfreeau/get-jwt-bundle:2.0.x-dev
 ```
 
 Next, be sure to enable the bundle in your `app/AppKernel.php` file:
