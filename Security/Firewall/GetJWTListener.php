@@ -18,25 +18,58 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 use InvalidArgumentException;
 
+/**
+ * Class GetJWTListener
+ *
+ * @package Gfreeau\Bundle\GetJWTBundle\Security\Firewall
+ */
 class GetJWTListener implements ListenerInterface
 {
+    /**
+     * @type
+     */
     protected $providerKey;
+
+    /**
+     * @type array
+     */
     protected $options;
+    
+    /**
+     * @type null|LoggerInterface
+     */
     protected $logger;
 
+    /**
+     * @type TokenStorageInterface
+     */
     private $securityContext;
+
+    /**
+     * @type AuthenticationManagerInterface
+     */
     private $authenticationManager;
+
+    /**
+     * @type AuthenticationSuccessHandlerInterface
+     */
     private $successHandler;
+
+    /**
+     * @type null|AuthenticationFailureHandlerInterface
+     */
     private $failureHandler;
 
     /**
-     * @param TokenStorageInterface $securityContext
-     * @param AuthenticationManagerInterface $authenticationManager
-     * @param $providerKey
-     * @param AuthenticationSuccessHandlerInterface $successHandler
-     * @param AuthenticationFailureHandlerInterface $failureHandler
-     * @param array $options
-     * @param LoggerInterface $logger
+     * GetJWTListener constructor.
+     *
+     * @param TokenStorageInterface                      $securityContext
+     * @param AuthenticationManagerInterface             $authenticationManager
+     * @param                                            $providerKey
+     * @param AuthenticationSuccessHandlerInterface      $successHandler
+     * @param AuthenticationFailureHandlerInterface|null $failureHandler
+     * @param array                                      $options
+     * @param LoggerInterface|null                       $logger
      * @throws InvalidArgumentException
      */
     public function __construct(TokenStorageInterface $securityContext, AuthenticationManagerInterface $authenticationManager, $providerKey, AuthenticationSuccessHandlerInterface $successHandler, AuthenticationFailureHandlerInterface $failureHandler = null, array $options = array(), LoggerInterface $logger = null)
@@ -59,7 +92,7 @@ class GetJWTListener implements ListenerInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param GetResponseEvent $event
      */
     public function handle(GetResponseEvent $event)
     {
@@ -94,6 +127,13 @@ class GetJWTListener implements ListenerInterface
         $event->setResponse($response);
     }
 
+    /**
+     * @param GetResponseEvent $event
+     * @param Request          $request
+     * @param TokenInterface   $token
+     *
+     * @return Response
+     */
     protected function onSuccess(GetResponseEvent $event, Request $request, TokenInterface $token)
     {
         if (null !== $this->logger) {
@@ -109,6 +149,13 @@ class GetJWTListener implements ListenerInterface
         return $response;
     }
 
+    /**
+     * @param GetResponseEvent        $event
+     * @param Request                 $request
+     * @param AuthenticationException $failed
+     *
+     * @return Response
+     */
     protected function onFailure(GetResponseEvent $event, Request $request, AuthenticationException $failed)
     {
         if (null !== $this->logger) {
