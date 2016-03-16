@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\Debug\Exception\ContextErrorException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -98,17 +99,26 @@ class GetJWTListener implements ListenerInterface
     {
         $request = $event->getRequest();
 
-        if ($this->options['post_only'] && !$request->isMethod('POST')) {
-            $event->setResponse(new JsonResponse('invalid method', 405));
-            return;
-        }
+        if ($request->headers->get('content_type') == 'application/json') {
+            $content = $request->getContent();
+            $params = (!empty($content)) ? json_decode($content, true) : array();
 
-        if ($this->options['post_only']) {
-            $username = trim($request->request->get($this->options['username_parameter'], null, true));
-            $password = $request->request->get($this->options['password_parameter'], null, true);
-        } else {
-            $username = trim($request->get($this->options['username_parameter'], null, true));
-            $password = $request->get($this->options['password_parameter'], null, true);
+            $username = trim($params[$this->options['username_parameter']]);
+            $password = trim($params[$this->options['password_parameter']]);
+        }
+        else {
+            if ($this->options['post_only'] && !$request->isMethod('POST')) {
+                $event->setResponse(new JsonResponse('invalid method', 405));
+                return;
+            }
+
+            if ($this->options['post_only']) {
+                $username = trim($request->request->get($this->options['username_parameter'], null, true));
+                $password = $request->request->get($this->options['password_parameter'], null, true);
+            } else {
+                $username = trim($request->get($this->options['username_parameter'], null, true));
+                $password = $request->get($this->options['password_parameter'], null, true);
+            }
         }
 
         try {
