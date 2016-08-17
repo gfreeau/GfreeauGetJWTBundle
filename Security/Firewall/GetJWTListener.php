@@ -74,15 +74,10 @@ class GetJWTListener implements ListenerInterface
             }
         }
 
-        if ($this->options['post_only'] && !$request->isMethod('POST')) {
-            $event->setResponse(new JsonResponse('invalid method', 405));
-            return;
-        }
-
-        if ($this->options['post_only']) {
+        if (!$request->isMethod('GET')) {
             if ($is_json_request) {
                 $params = json_decode($request->getContent(), true);
-                
+
                 $username = trim($params[$this->options['username_parameter']]);
                 $password = trim($params[$this->options['password_parameter']]);
             } else {
@@ -90,8 +85,8 @@ class GetJWTListener implements ListenerInterface
                 $password = $request->request->get($this->options['password_parameter'], null, true);
             }
         } else {
-            $username = trim($request->get($this->options['username_parameter'], null, true));
-            $password = $request->get($this->options['password_parameter'], null, true);
+            $username = trim($request->query->get($this->options['username_parameter'], null, true));
+            $password = $request->query->get($this->options['password_parameter'], null, true);
         }
 
         try {
