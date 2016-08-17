@@ -18,10 +18,14 @@ Installation
 
 Installation with composer:
 
-``` json
-"require": {
-    "gfreeau/get-jwt-bundle": "~1.0"
-}
+``` bash
+composer require gfreeau/get-jwt-bundle
+```
+
+If you are using symfony 3 you can test the new 2.0 version:
+
+``` bash
+composer require gfreeau/get-jwt-bundle:2.0.x-dev
 ```
 
 Next, be sure to enable the bundle in your `app/AppKernel.php` file:
@@ -52,6 +56,7 @@ Usage
                 username_parameter: username
                 password_parameter: password
                 authentication_provider: security.authentication.provider.dao
+                user_checker: security.user_checker 
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
