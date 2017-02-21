@@ -2,20 +2,20 @@
 
 namespace Gfreeau\Bundle\GetJWTBundle\Security\Firewall;
 
+use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Psr\Log\LoggerInterface;
-use RuntimeException;
 use InvalidArgumentException;
 
 /**
@@ -86,7 +86,6 @@ class GetJWTListener implements ListenerInterface
         $this->options = array_merge(array(
             'username_parameter' => 'username',
             'password_parameter' => 'password',
-            'post_only' => true,
         ), $options);
         $this->logger = $logger;
     }
@@ -98,18 +97,26 @@ class GetJWTListener implements ListenerInterface
     {
         $request = $event->getRequest();
 
-        if ($this->options['post_only'] && !$request->isMethod('POST')) {
-            $event->setResponse(new JsonResponse('invalid method', 405));
+        if (!in_array($request->getMethod(), ['POST', 'GET'])) {
             return;
         }
 
-        if ($this->options['post_only']) {
-            $username = trim($request->request->get($this->options['username_parameter'], null, true));
-            $password = $request->request->get($this->options['password_parameter'], null, true);
+        if ($request->isMethod('POST')) {
+            if ('json' === $request->getContentType()) {
+                $params = json_decode($request->getContent(), true);
+                if (JSON_ERROR_NONE !== json_last_error()) {
+                    throw new BadRequestHttpException('Bad JSON request.');
+                }
+                $parameterBag = new ParameterBag($params);
+            } else {
+                $parameterBag = $request->request;
+            }
         } else {
-            $username = trim($request->get($this->options['username_parameter'], null, true));
-            $password = $request->get($this->options['password_parameter'], null, true);
+            $parameterBag = $request->query;
         }
+
+        $username = trim($parameterBag->get($this->options['username_parameter']));
+        $password = $parameterBag->get($this->options['password_parameter']);
 
         try {
             $token = $this->authenticationManager->authenticate(new UsernamePasswordToken($username, $password, $this->providerKey));
@@ -117,7 +124,7 @@ class GetJWTListener implements ListenerInterface
             $response = $this->onSuccess($event, $request, $token);
 
         } catch (AuthenticationException $e) {
-            if (null == $this->failureHandler) {
+            if (null === $this->failureHandler) {
                 throw $e;
             }
 

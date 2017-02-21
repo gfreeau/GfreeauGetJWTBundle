@@ -55,7 +55,6 @@ Usage
                 # this is the default config
                 username_parameter: username
                 password_parameter: password
-                post_only: true
                 authentication_provider: security.authentication.provider.dao
                 user_checker: security.user_checker 
                 success_handler: lexik_jwt_authentication.handler.authentication_success
@@ -77,6 +76,7 @@ A route must be defined for the url you wish to use to get your token:
 ```php
 /**
  * @Route("/api/getToken")
+ * @Method({"POST"})
  */
 public function getTokenAction()
 {
