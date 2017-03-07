@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\Debug\Exception\ContextErrorException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -98,17 +99,27 @@ class GetJWTListener implements ListenerInterface
     {
         $request = $event->getRequest();
 
-        if ($this->options['post_only'] && !$request->isMethod('POST')) {
-            $event->setResponse(new JsonResponse('invalid method', 405));
-            return;
+        $is_json_request = $request->headers->get('content_type') === 'application/json';
+
+        if ($is_json_request) {
+            if (empty($request->getContent())) {
+                throw new \Exception('Error: Request parameters not found.');
+            }
         }
 
-        if ($this->options['post_only']) {
-            $username = trim($request->request->get($this->options['username_parameter'], null, true));
-            $password = $request->request->get($this->options['password_parameter'], null, true);
+        if (!$request->isMethod('GET')) {
+            if ($is_json_request) {
+                $params = json_decode($request->getContent(), true);
+
+                $username = trim($params[$this->options['username_parameter']]);
+                $password = trim($params[$this->options['password_parameter']]);
+            } else {
+                $username = trim($request->request->get($this->options['username_parameter'], null, true));
+                $password = $request->request->get($this->options['password_parameter'], null, true);
+            }
         } else {
-            $username = trim($request->get($this->options['username_parameter'], null, true));
-            $password = $request->get($this->options['password_parameter'], null, true);
+            $username = trim($request->query->get($this->options['username_parameter'], null, true));
+            $password = $request->query->get($this->options['password_parameter'], null, true);
         }
 
         try {
@@ -117,7 +128,7 @@ class GetJWTListener implements ListenerInterface
             $response = $this->onSuccess($event, $request, $token);
 
         } catch (AuthenticationException $e) {
-            if (null == $this->failureHandler) {
+            if (null === $this->failureHandler) {
                 throw $e;
             }
 
