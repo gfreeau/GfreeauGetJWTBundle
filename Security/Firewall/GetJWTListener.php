@@ -97,10 +97,6 @@ class GetJWTListener implements ListenerInterface
     {
         $request = $event->getRequest();
 
-        if (!in_array($request->getMethod(), ['POST', 'GET'])) {
-            return;
-        }
-
         if ($request->isMethod('POST')) {
             if ('json' === $request->getContentType()) {
                 $params = json_decode($request->getContent(), true);
