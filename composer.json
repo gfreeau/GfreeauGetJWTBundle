@@ -15,7 +15,9 @@
         "php": ">=5.3.3",
         "symfony/http-kernel": "^2.7 || ^3.2 || ^4.0",
         "symfony/dependency-injection": "^2.7 || ^3.2 || ^4.0",
-        "symfony/security-bundle": "^2.7 || ^3.2 || ^4.0",
+        "symfony/security-bundle": "^2.7 || ^3.2 || ^4.0"
+    },
+    "suggests": {
         "lexik/jwt-authentication-bundle": "^1.4.3 || ^2.0.0"
     },
     "autoload": {
