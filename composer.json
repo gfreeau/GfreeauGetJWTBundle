@@ -13,8 +13,8 @@
     "license": "MIT",
     "require": {
         "php": ">=5.3.3",
-        "symfony/framework-bundle": "^2.3 || ^3.3 || ^4.0",
-        "symfony/security-bundle": "^2.3 || ^3.3 || ^4.0",
+        "symfony/framework-bundle": "^2.7 || ^3.2 || ^4.0",
+        "symfony/security-bundle": "^2.7 || ^3.2 || ^4.0",
         "lexik/jwt-authentication-bundle": "^1.4.3|^2.0.0@dev"
     },
     "autoload": {
