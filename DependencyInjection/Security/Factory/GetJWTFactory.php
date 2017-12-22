@@ -3,10 +3,12 @@
 namespace Gfreeau\Bundle\GetJWTBundle\DependencyInjection\Security\Factory;
 
 use Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\SecurityFactoryInterface;
+
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 
 class GetJWTFactory implements SecurityFactoryInterface
 {
@@ -17,7 +19,7 @@ class GetJWTFactory implements SecurityFactoryInterface
     {
         $providerId = 'security.authentication.provider.get.jwt.'.$id;
         $container
-            ->setDefinition($providerId, new DefinitionDecorator($config['authentication_provider']))
+            ->setDefinition($providerId, $this->createChildDefinition($config['authentication_provider']))
             ->replaceArgument(0, new Reference($userProvider))
             ->replaceArgument(1, new Reference($config['user_checker']))
             ->replaceArgument(2, $id)
@@ -25,7 +27,7 @@ class GetJWTFactory implements SecurityFactoryInterface
 
         $listenerId = 'security.authentication.listener.get.jwt.'.$id;
         $listener = $container
-            ->setDefinition($listenerId, new DefinitionDecorator('gfreeau_get_jwt.security.authentication.listener'))
+            ->setDefinition($listenerId, $this->createChildDefinition('gfreeau_get_jwt.security.authentication.listener'))
             ->replaceArgument(2, $id)
             ->replaceArgument(5, $config)
         ;
@@ -93,4 +95,12 @@ class GetJWTFactory implements SecurityFactoryInterface
             ->end();
     }
 
+    private function createChildDefinition($parent)
+    {
+        if (class_exists('Symfony\Component\DependencyInjection\ChildDefinition')) {
+            return new ChildDefinition($parent);
+        }
+
+        return new DefinitionDecorator($parent);
+    }
 }
