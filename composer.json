@@ -1,8 +1,8 @@
 {
     "name": "gfreeau/get-jwt-bundle",
     "type": "symfony-bundle",
-    "description": "This Symfony2 bundle provides a security listener to return a JWT",
-    "keywords": ["Symfony2", "bundle", "jwt", "jws", "authentication"],
+    "description": "This Symfony bundle provides a security listener to return a JWT",
+    "keywords": ["symfony2", "symfony3", "symfony4", "bundle", "jwt", "jws", "authentication"],
     "homepage": "https://github.com/gfreeau/GfreeauGetJWTBundle",
     "authors": [
         {
